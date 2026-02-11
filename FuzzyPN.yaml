@@ -1,0 +1,71 @@
+mixed-port: 7890
+allow-lan: true
+bind-address: '*'
+mode: rule
+log-level: info
+ipv6: true
+external-controller: '127.0.0.1:9090'
+dns:
+  enable: true
+  ipv6: true
+  use-hosts: true
+  enhanced-mode: redir-host
+  default-nameserver:
+    - 1.1.1.1
+    - 8.8.8.8
+  nameserver:
+    - 'https://cloudflare-dns.com/dns-query'
+    - 'https://dns.google/dns-query'
+    - 'https://dns.quad9.net/dns-query'
+  fallback:
+    - 'tls://1.0.0.1:853'
+    - 'tls://8.8.4.4:853'
+  fallback-filter:
+    geoip: true
+    ipcidr:
+      - 240.0.0.0/4
+      - 0.0.0.0/32
+proxies:
+  -
+    name: '🇻🇳Youtube Premium Public HN'
+    type: ss
+    server: hn.fzpn.net
+    port: 116
+    cipher: 2022-blake3-aes-256-gcm
+    password: 'YghWY4stNd9HIQlolHMpxk90iXGtNKVuELK5Tn1F2kk=:YzdhNDU3ZTUtY2YyZi01MzUwLTg5MTktYjcyNTU0N2Y='
+    udp: true
+proxy-groups:
+  -
+    name: Proxy
+    type: select
+    proxies:
+      - Auto
+      - 'Fault transfer'
+      - '🇻🇳Youtube Premium Public HN'
+  -
+    name: Auto
+    type: url-test
+    proxies:
+      - '🇻🇳Youtube Premium Public HN'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 86400
+  -
+    name: 'Fault transfer'
+    type: fallback
+    proxies:
+      - '🇻🇳Youtube Premium Public HN'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 7200
+  -
+    name: VN
+    type: url-test
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    proxies:
+      - '🇻🇳Youtube Premium Public HN'
+rules:
+  - 'DOMAIN,panel.fuzzypn.me,DIRECT'
+  - 'GEOSITE,category-ads-all,REJECT'
+  - 'GEOIP,VN,DIRECT'
+  - 'GEOIP,!VN,Proxy'
+  - 'MATCH,Proxy'
